@@ -24,27 +24,31 @@ import org.springframework.web.bind.annotation.RestController;
 public class UrlShortenRestController {
 	
 	//1. create a method getRandomChars() to generate random characters
-	
-	private String getRandomChars() {
-		String randomStr = "";
-		String possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		for (int i = 0; i < 5; i++)
-			randomStr += possibleChars.charAt((int) Math.floor(Math.random() * possibleChars.length()));
-		return randomStr;
-	}
+//	
+//	private String getRandomChars() {
+//		String randomStr = "";
+//		String possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+//		for (int i = 0; i < 5; i++)
+//			randomStr += possibleChars.charAt((int) Math.floor(Math.random() * possibleChars.length()));
+//		return randomStr;
+//	}
 
 	// 2. Create a Model or POJO to set and get the FULL URL and SHORT URL i.e. ShortenUrl.java
 	
 	
 	private Map<String, ShortenUrl> shortenUrlList = new HashMap<>();
-	private HashSet<String> guaranteeRandomString = new HashSet<>();// Using Set will prevent duped random strings.		
+	private HashSet<String> guaranteeRandomString = new HashSet<>();
 	
 	
 	// 3.Create Rest API (/shortenUrl ) by using random characters 
 	@RequestMapping(value="/shortenurl", method=RequestMethod.POST)
 	public ResponseEntity<Object> getShortenUrl(@RequestBody ShortenUrl shortenUrl) throws MalformedURLException {
-		String guaranteeRandomString=getRandomChars();// Using Set will prevent duped random strings.		
-		String randomChar = guaranteeRandomString;
+		guaranteeRandomString.clear();
+		guaranteeRandomString.add(RandomString.getRandomChars());
+		String removeSquareBraces = guaranteeRandomString.toString().replaceAll("(^\\[|\\]$)", "");
+		
+		String randomChar = removeSquareBraces;
+		guaranteeRandomString.clear();
 		setShortUrl(randomChar, shortenUrl); //create short url here
 		return new ResponseEntity<Object>(shortenUrl, HttpStatus.OK);
 	}
@@ -52,6 +56,7 @@ public class UrlShortenRestController {
 	private void setShortUrl(String randomChar, ShortenUrl shortenUrl) throws MalformedURLException {
 		 shortenUrl.setShort_url("http://localhost:8080/s/"+randomChar);
 		 shortenUrlList.put(randomChar, shortenUrl);
+		 
 	}
 	
 	
@@ -59,6 +64,9 @@ public class UrlShortenRestController {
 	@RequestMapping(value="/s/{randomstring}", method=RequestMethod.GET)
 	public void getFullUrl(HttpServletResponse response, @PathVariable("randomstring") String randomString) throws IOException {
 		response.sendRedirect(shortenUrlList.get(randomString).getFull_url());
+		shortenUrlList.clear();
+		guaranteeRandomString.clear();
+		
 		//getting full url from HashMap using short url 
 	}
 
