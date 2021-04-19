@@ -3,6 +3,7 @@ package com.shubhamsingh.projects.urlshortner;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,12 +37,14 @@ public class UrlShortenRestController {
 	
 	
 	private Map<String, ShortenUrl> shortenUrlList = new HashMap<>();
+	private HashSet<String> guaranteeRandomString = new HashSet<>();// Using Set will prevent duped random strings.		
 	
 	
 	// 3.Create Rest API (/shortenUrl ) by using random characters 
 	@RequestMapping(value="/shortenurl", method=RequestMethod.POST)
 	public ResponseEntity<Object> getShortenUrl(@RequestBody ShortenUrl shortenUrl) throws MalformedURLException {
-		String randomChar = getRandomChars();
+		String guaranteeRandomString=getRandomChars();// Using Set will prevent duped random strings.		
+		String randomChar = guaranteeRandomString;
 		setShortUrl(randomChar, shortenUrl); //create short url here
 		return new ResponseEntity<Object>(shortenUrl, HttpStatus.OK);
 	}
